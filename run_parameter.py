@@ -1,0 +1,30 @@
+
+import subprocess
+from itertools import product
+
+def main():
+    base_vcf = "filtered_jointcall_popmax01.vcf.gz"
+    script_path = "shared_haplotype_with_ultra_rare_threshold.py"
+    
+    parameters = {
+        '--cluster-distance': [100, 250 ,500, 1000 ],
+        '--min-variants': [2, 3, 5, 8],
+        '--min-ultra-rare': [1, 2, 3, 4]
+    }
+    
+    for dist, min_var, min_rare in product(*parameters.values()):
+        output = f"shared_regions_dist{dist}_vars{min_var}_rare{min_rare}.tsv"
+        cmd = [
+            "python3", script_path,
+            base_vcf,
+            "--cluster-distance", str(dist),
+            "--min-variants", str(min_var),
+            "--min-ultra-rare", str(min_rare),
+            "--ultra-rare-threshold", "0.0001"
+        ]
+        print(f"Running: {' '.join(cmd)} > {output}")
+        with open(output, 'w') as f:
+            subprocess.run(cmd, stdout=f)
+
+if __name__ == "__main__":
+    main()
